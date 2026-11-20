@@ -1,0 +1,142 @@
+rules_version = '2';
+
+// Farming Nyumbani engagement data.
+//
+// Reads are public for reviews, comments and reactions: the marketplace is
+// browsable without an account. Everything else - creating, deleting, marking
+// as deleted, restoring - requires the caller to be the author of the document,
+// checked against `authorId`, which the client cannot forge for someone else
+// because the rules compare it to request.auth.uid.
+//
+// Updates may only change the deletion stamp. A review's text, rating, farm and
+// owner cannot be edited after creation, so "restore" cannot be used to smuggle
+// different content in.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function untouched(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    function validReview() {
+      return request.resource.data.authorId == request.auth.uid
+        && request.resource.data.farmId is string
+        && request.resource.data.author is string
+        && request.resource.data.author.size() > 0
+        && request.resource.data.author.size() <= 40
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.body is string
+        && request.resource.data.body.size() >= 20
+        && request.resource.data.body.size() <= 2000
+        && request.resource.data.deletedAt == null;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn() && validReview();
+
+      allow update: if signedIn()
+        && resource.data.authorId == request.auth.uid
+        && untouched('authorId')
+        && untouched('farmId')
+        && untouched('author')
+        && untouched('rating')
+        && untouched('body')
+        && untouched('createdAt');
+
+      allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.farmId is string
+        && request.resource.data.reviewId is string
+        && request.resource.data.author is string
+        && request.resource.data.author.size() > 0
+        && request.resource.data.author.size() <= 40
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 1000
+        && request.resource.data.deletedAt == null;
+
+      allow update: if signedIn()
+        && resource.data.authorId == request.auth.uid
+        && untouched('authorId')
+        && untouched('farmId')
+        && untouched('reviewId')
+        && untouched('author')
+        && untouched('body')
+        && untouched('createdAt');
+
+      allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+    match /reactions/{reactionId} {
+      allow read: if true;
+
+      allow create: if signedIn()
+        && request.resource.data.actorId == request.auth.uid
+        && request.resource.data.emoji is string
+        && request.resource.data.emoji.size() <= 8
+        && request.resource.data.farmId is string
+        && request.resource.data.targetId is string;
+
+      // A reaction is never edited, only added or removed.
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.actorId == request.auth.uid;
+    }
+
+    // A lease request is the tenant's own document: only they read it back, and
+    // only the landowner side (a later release) will change its status. Nobody
+    // can edit or delete a request after sending it.
+    match /leaseRequests/{requestId} {
+      allow read: if signedIn() && resource.data.requesterId == request.auth.uid;
+
+      allow create: if signedIn()
+        && request.resource.data.requesterId == request.auth.uid
+        && request.resource.data.farmId is string
+        && request.resource.data.farmTitle is string
+        && request.resource.data.ownerName is string
+        && request.resource.data.requester is string
+        && request.resource.data.requester.size() > 0
+        && request.resource.data.requester.size() <= 40
+        && request.resource.data.crops is string
+        && request.resource.data.crops.size() > 0
+        && request.resource.data.crops.size() <= 80
+        && request.resource.data.startDate is string
+        && request.resource.data.startDate.size() <= 10
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 10
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.status == 'pending';
+
+      allow update, delete: if false;
+    }
+
+    match /reports/{reportId} {
+      // Reports contain the reporter's name, so only they may read one back.
+      allow read: if signedIn() && resource.data.reporterId == request.auth.uid;
+
+      allow create: if signedIn()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.farmId is string
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0
+        && request.resource.data.reason.size() <= 80
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 300;
+
+      allow update, delete: if false;
+    }
+  }
+}
