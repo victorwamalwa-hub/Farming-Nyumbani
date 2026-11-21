@@ -10,9 +10,15 @@ describe('county data', () => {
     expect(getCounty('nairobi')?.name).toBe('Nairobi')
   })
 
-  it('returns a county name or an empty string', () => {
+  it('includes region data for seed-farm counties', () => {
+    expect(getCounty('kiambu')?.region).toBe('Central')
+    expect(getCounty('nakuru')?.region).toBe('Rift Valley')
+    expect(getCounty('mombasa')?.region).toBe('Coast')
+  })
+
+  it('returns a county name or Unknown county', () => {
     expect(getCountyName('UASIN-GISHU')).toBe('Uasin Gishu')
-    expect(getCountyName('unknown')).toBe('')
+    expect(getCountyName('unknown')).toBe('Unknown county')
   })
 
   it('uses unique, lower-case slugs', () => {

@@ -1,5 +1,7 @@
 // Sample reviews so the engagement features are visible before accounts exist.
 // Read-only: user-generated reviews are stored separately and appended after these.
+// temporary, in a console or test
+console.log([...new Set(farms.map(f => f.countySlug))].sort())
 export const SEED_REVIEWS = [
   {
     id: 'seed-rev-1',
