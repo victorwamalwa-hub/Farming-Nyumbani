@@ -21,6 +21,9 @@ describe('FarmDetail', () => {
     expect(screen.getByText('Wanjiku Mwangi')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Farmer reviews' })).toBeInTheDocument()
     expect(screen.getByText(/Clear farm details/)).toBeInTheDocument()
+    expect(screen.getByText('5/5 · 18 Jan 2026')).toBeInTheDocument()
+    expect(screen.getByText('2 comments')).toBeInTheDocument()
+    expect(screen.getByText(/borehole was serviced last season/)).toBeInTheDocument()
   })
 
   it('shows a not-found message for an unknown farm id', () => {
