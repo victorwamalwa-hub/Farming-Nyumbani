@@ -64,8 +64,7 @@ function readAccounts() {
   }
 }
 
-function writeAccounts(accounts) {
-  const store = storage()
+export function writeAccounts(accounts) {  const store = storage()
   if (!store) throw new Error(NO_STORAGE)
 
   const payload = JSON.stringify(accounts)

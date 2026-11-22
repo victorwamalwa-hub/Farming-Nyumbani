@@ -1,3 +1,4 @@
+import LocalModeNotice from '../components/auth/LocalModeNotice'
 import { useState } from 'react'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { Link, useNavigate } from 'react-router-dom'
@@ -40,6 +41,7 @@ export default function Register() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Get started</p>
         <h1 className="mt-2 font-display text-3xl font-semibold text-ink">Create your account</h1>
         <p className="mt-2 text-sm text-muted">Join farmers and landowners growing together.</p>
+        <LocalModeNotice className="mb-4" />
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>

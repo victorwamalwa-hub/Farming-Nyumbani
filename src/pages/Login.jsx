@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import LocalModeNotice from '../components/auth/LocalModeNotice'
 import { auth } from '../lib/firebase'
 import { authErrorMessage } from '../utils/AuthErrors'
 
@@ -33,6 +34,7 @@ export default function Login() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Welcome back</p>
         <h1 className="mt-2 font-display text-3xl font-semibold text-ink">Sign in</h1>
         <p className="mt-2 text-sm text-muted">Sign in to manage your farming account and requests.</p>
+        <LocalModeNotice className="mb-4" />
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>
