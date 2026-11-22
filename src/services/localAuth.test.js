@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { authErrorMessage } from '../utils/authErrors'
+import { authErrorMessage } from '../utils/AuthErrors'
 import { currentLocalUser, signInLocal, signOutLocal, signUpLocal } from './localAuth'
 
 const ACCOUNT = { name: 'Amina Yusuf', email: 'amina@example.com', password: 'secret123' }
