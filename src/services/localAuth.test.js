@@ -91,34 +91,35 @@ describe('localAuth', () => {
             window.localStorage.setItem = original
         }
     })
-it('explains when storage is missing entirely', async () => {
-    const blocked = vi.spyOn(window, 'localStorage', 'get').mockReturnValue(undefined)
 
-    try {
-        expect(currentLocalUser()).toBeNull()
-        expect(() => signOutLocal()).not.toThrow()
-        await expect(signUpLocal(ACCOUNT)).rejects.toThrow('blocking local storage')
-    } finally {
-        blocked.mockRestore()
-    }
-})
+    it('explains when storage is missing entirely', async () => {
+        const blocked = vi.spyOn(window, 'localStorage', 'get').mockReturnValue(undefined)
 
-it('refuses to hash a password without Web Crypto', async () => {
-    const noSubtle = vi.spyOn(globalThis.crypto, 'subtle', 'get').mockReturnValue(undefined)
-
-    try {
-        await expect(signUpLocal(ACCOUNT)).rejects.toThrow('cannot store passwords safely')
-    } finally {
-        noSubtle.mockRestore()
-    }
-})
-
-it('clears the session even when storage throws on remove', async () => {
-    await signUpLocal(ACCOUNT)
-    vi.spyOn(window.localStorage, 'removeItem').mockImplementation(() => {
-        throw new Error('blocked')
+        try {
+            expect(currentLocalUser()).toBeNull()
+            expect(() => signOutLocal()).not.toThrow()
+            await expect(signUpLocal(ACCOUNT)).rejects.toThrow('blocking local storage')
+        } finally {
+            blocked.mockRestore()
+        }
     })
 
-    expect(() => signOutLocal()).not.toThrow()
-})
+    it('refuses to hash a password without Web Crypto', async () => {
+        const noSubtle = vi.spyOn(globalThis.crypto, 'subtle', 'get').mockReturnValue(undefined)
+
+        try {
+            await expect(signUpLocal(ACCOUNT)).rejects.toThrow('cannot store passwords safely')
+        } finally {
+            noSubtle.mockRestore()
+        }
+    })
+
+    it('clears the session even when storage throws on remove', async () => {
+        await signUpLocal(ACCOUNT)
+        vi.spyOn(window.localStorage, 'removeItem').mockImplementation(() => {
+            throw new Error('blocked')
+        })
+
+        expect(() => signOutLocal()).not.toThrow()
+    })
 })
