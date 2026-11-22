@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { authErrorMessage } from '../utils/AuthErrors'
-import { currentLocalUser, signInLocal, signOutLocal, signUpLocal } from './localAuth'
+import { currentLocalUser, signInLocal, signOutLocal, signUpLocal, writeAccounts } from './localAuth'
 
 const ACCOUNT = { name: 'Amina Yusuf', email: 'amina@example.com', password: 'secret123' }
 
@@ -72,23 +72,25 @@ describe('localAuth', () => {
         expect(currentLocalUser()).toBeNull()
     })
 
-    it('reports a storage write that the browser refuses', async () => {
+    it('reports a storage write that the browser refuses', () => {
         const original = window.localStorage.setItem
-        window.localStorage.setItem = () => { throw new Error('quota') }
+        const storagePrototype = Object.getPrototypeOf(window.localStorage)
+        storagePrototype.setItem = () => { throw new Error('quota') }
         try {
-            await expect(signUpLocal(ACCOUNT)).rejects.toThrow('This browser refused to save your account')
+            expect(() => writeAccounts([])).toThrow('This browser refused to save your account')
         } finally {
-            window.localStorage.setItem = original
+            storagePrototype.setItem = original
         }
     })
 
-    it('reports a write the browser silently drops', async () => {
+    it('reports a write the browser silently drops', () => {
         const original = window.localStorage.setItem
-        window.localStorage.setItem = () => { }
+        const storagePrototype = Object.getPrototypeOf(window.localStorage)
+        storagePrototype.setItem = () => {}
         try {
-            await expect(signUpLocal(ACCOUNT)).rejects.toThrow('This browser refused to save your account')
+            expect(() => writeAccounts([])).toThrow('This browser refused to save your account')
         } finally {
-            window.localStorage.setItem = original
+            storagePrototype.setItem = original
         }
     })
 
