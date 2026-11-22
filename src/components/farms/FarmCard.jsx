@@ -1,41 +1,68 @@
 import { Link } from 'react-router-dom'
 import { getCountyName } from '../../data/counties'
-
-const formatKes = new Intl.NumberFormat('en-KE', {
-  style: 'currency',
-  currency: 'KES',
-  maximumFractionDigits: 0,
-})
+import { getCrop } from '../../data/crops'
+import { formatAcres, rentLabel } from '../../utils/format'
+import Badge from '../ui/Badge'
 
 export default function FarmCard({ farm }) {
+  const leadCrop = getCrop(farm.suitableCrops[0])
+
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-line bg-surface p-5 shadow-card">
-      <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full bg-primary-tint px-3 py-1 text-xs font-semibold text-primary-dark">
-          {getCountyName(farm.countySlug)}
-        </span>
-        {farm.verified && <span className="text-xs font-medium text-primary">Verified</span>}
+    <article className="card-interactive group overflow-hidden rounded-xl border border-line bg-surface shadow-card">
+      <div
+        aria-hidden="true"
+        className="flex h-36 items-center justify-center bg-gradient-to-br from-primary-tint via-paper to-accent-tint text-4xl"
+      >
+        {leadCrop?.emoji ?? '🌱'}
       </div>
-      <h2 className="mt-4 font-display text-xl font-semibold text-ink">
-        <Link className="hover:text-primary" to={`/farms/${farm.id}`}>
-          {farm.title}
-        </Link>
-      </h2>
-      <p className="mt-1 text-sm text-muted">
-        {farm.ward} · {farm.sizeAcres} {farm.sizeAcres === 1 ? 'acre' : 'acres'}
-      </p>
-      <p className="mt-4 flex-1 text-sm leading-6 text-muted">{farm.description}</p>
-      <ul aria-label="Suitable crops" className="mt-4 flex list-none flex-wrap gap-2 p-0">
-        {farm.suitableCrops.map((crop) => (
-          <li className="rounded-full border border-line px-2.5 py-1 text-xs capitalize text-ink" key={crop}>
-            {crop.replaceAll('-', ' ')}
-          </li>
-        ))}
-      </ul>
-      <p className="mt-5 border-t border-line pt-4 font-semibold text-ink">
-        {formatKes.format(farm.rentKes)}
-        <span className="ml-1 text-sm font-normal text-muted">per {farm.rentPeriod}</span>
-      </p>
+
+      <div className="p-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone="neutral">{getCountyName(farm.countySlug)}</Badge>
+          {farm.verified ? (
+            <Badge tone="primary">Verified</Badge>
+          ) : (
+            <Badge tone="warning">Unverified</Badge>
+          )}
+        </div>
+
+        <h3 className="mt-3 font-display text-base font-semibold leading-snug">
+          <Link to={`/farms/${farm.id}`} className="hover:text-primary">
+            {farm.title}
+          </Link>
+        </h3>
+
+        <dl className="mt-3 grid grid-cols-2 gap-2">
+          <div>
+            <dt className="text-xs text-muted">Size</dt>
+            <dd className="text-sm font-medium">{formatAcres(farm.sizeAcres)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-muted">Rent</dt>
+            <dd className="text-sm font-medium">{rentLabel(farm)}</dd>
+          </div>
+        </dl>
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {farm.suitableCrops.map((slug) => {
+            const crop = getCrop(slug)
+            return crop ? (
+              <Badge key={slug} tone="accent">
+                {crop.name}
+              </Badge>
+            ) : null
+          })}
+        </div>
+
+        <p className="mt-4 flex items-center justify-between text-xs text-muted">
+          <span>
+            {farm.leaseType} · {farm.waterSource}
+          </span>
+          <span aria-hidden="true" className="text-primary transition-transform group-hover:translate-x-0.5">
+            →
+          </span>
+        </p>
+      </div>
     </article>
   )
 }
