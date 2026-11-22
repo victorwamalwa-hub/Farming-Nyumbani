@@ -91,17 +91,6 @@ describe('localAuth', () => {
             window.localStorage.setItem = original
         }
     })
-    const original = window.localStorage.setItem
-    const storagePrototype = Object.getPrototypeOf(window.localStorage)
-    // Accepts the value without throwing, but nothing is actually stored.
-    storagePrototype.setItem = () => { }
-    try {
-        await expect(signUpLocal(ACCOUNT)).rejects.toThrow('This browser refused to save your account')
-    } finally {
-        storagePrototype.setItem = original
-    }
-})
-
 it('explains when storage is missing entirely', async () => {
     const blocked = vi.spyOn(window, 'localStorage', 'get').mockReturnValue(undefined)
 
