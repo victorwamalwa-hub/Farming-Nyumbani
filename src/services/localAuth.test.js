@@ -73,17 +73,28 @@ describe('localAuth', () => {
   })
 
   it('reports a storage write that the browser refuses', async () => {
-    vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {
+    const original = window.localStorage.setItem
+    const storagePrototype = Object.getPrototypeOf(window.localStorage)
+    storagePrototype.setItem = () => {
       throw new Error('quota')
-    })
-
-    await expect(signUpLocal(ACCOUNT)).rejects.toThrow('This browser refused to save your account')
+    }
+    try {
+      await expect(signUpLocal(ACCOUNT)).rejects.toThrow('This browser refused to save your account')
+    } finally {
+      storagePrototype.setItem = original
+    }
   })
 
   it('reports a write the browser silently drops', async () => {
-    vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {})
-
-    await expect(signUpLocal(ACCOUNT)).rejects.toThrow('This browser refused to save your account')
+    const original = window.localStorage.setItem
+    const storagePrototype = Object.getPrototypeOf(window.localStorage)
+    // Accepts the value without throwing, but nothing is actually stored.
+    storagePrototype.setItem = () => {}
+    try {
+      await expect(signUpLocal(ACCOUNT)).rejects.toThrow('This browser refused to save your account')
+    } finally {
+      storagePrototype.setItem = original
+    }
   })
 
   it('explains when storage is missing entirely', async () => {
