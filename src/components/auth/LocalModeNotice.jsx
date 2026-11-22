@@ -1,4 +1,3 @@
-import LocalModeNotice from '../components/auth/LocalModeNotice'
 import { useAuth } from '../../context/AuthContext'
 
 /**

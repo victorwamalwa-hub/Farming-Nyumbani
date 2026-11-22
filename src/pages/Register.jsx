@@ -1,3 +1,4 @@
+import LocalModeNotice from '../components/auth/LocalModeNotice'
 import { useState } from 'react'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { Link, useNavigate } from 'react-router-dom'
