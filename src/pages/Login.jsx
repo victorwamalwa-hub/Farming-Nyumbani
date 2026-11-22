@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import LocalModeNotice from '../components/auth/LocalModeNotice'
+import AuthCard from '../components/auth/AuthCard'
 import { auth } from '../lib/firebase'
 import { authErrorMessage } from '../utils/AuthErrors'
 
@@ -29,13 +29,19 @@ export default function Login() {
   }
 
   return (
-    <main className="section flex justify-center py-10 sm:py-14">
-      <section className="w-full max-w-md rounded-2xl border border-line bg-surface p-6 shadow-card sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">Welcome back</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold text-ink">Sign in</h1>
-        <p className="mt-2 text-sm text-muted">Sign in to manage your farming account and requests.</p>
-        <LocalModeNotice className="mb-4" />
-
+    <AuthCard
+      eyebrow="Welcome back"
+      title="Sign in"
+      description="Sign in to manage your farming account and requests."
+      footer={
+        <>
+          New to Farming Nyumbani?{' '}
+          <Link className="font-semibold text-primary hover:underline" to="/register">
+            Create an account
+          </Link>
+        </>
+      }
+    >
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="mb-1 block text-sm font-medium text-ink" htmlFor="login-email">
@@ -74,14 +80,6 @@ export default function Login() {
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
-
-        <p className="mt-5 text-center text-sm text-muted">
-          New to Farming Nyumbani?{' '}
-          <Link className="font-semibold text-primary hover:underline" to="/register">
-            Create an account
-          </Link>
-        </p>
-      </section>
-    </main>
+    </AuthCard>
   )
 }

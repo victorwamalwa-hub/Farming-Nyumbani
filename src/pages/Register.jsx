@@ -1,7 +1,7 @@
-import LocalModeNotice from '../components/auth/LocalModeNotice'
 import { useState } from 'react'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { Link, useNavigate } from 'react-router-dom'
+import AuthCard from '../components/auth/AuthCard'
 import { auth } from '../lib/firebase'
 import { authErrorMessage } from '../utils/AuthErrors'
 
@@ -36,13 +36,19 @@ export default function Register() {
   }
 
   return (
-    <main className="section flex justify-center py-10 sm:py-14">
-      <section className="w-full max-w-md rounded-2xl border border-line bg-surface p-6 shadow-card sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">Get started</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold text-ink">Create your account</h1>
-        <p className="mt-2 text-sm text-muted">Join farmers and landowners growing together.</p>
-        <LocalModeNotice className="mb-4" />
-
+    <AuthCard
+      eyebrow="Get started"
+      title="Create your account"
+      description="Join farmers and landowners growing together."
+      footer={
+        <>
+          Already have an account?{' '}
+          <Link className="font-semibold text-primary hover:underline" to="/login">
+            Sign in
+          </Link>
+        </>
+      }
+    >
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="mb-1 block text-sm font-medium text-ink" htmlFor="register-name">
@@ -109,14 +115,6 @@ export default function Register() {
             {submitting ? 'Creating account…' : 'Create account'}
           </button>
         </form>
-
-        <p className="mt-5 text-center text-sm text-muted">
-          Already have an account?{' '}
-          <Link className="font-semibold text-primary hover:underline" to="/login">
-            Sign in
-          </Link>
-        </p>
-      </section>
-    </main>
+    </AuthCard>
   )
 }
