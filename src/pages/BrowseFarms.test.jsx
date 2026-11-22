@@ -47,11 +47,21 @@ describe('BrowseFarms', () => {
     await userEvent.selectOptions(screen.getByLabelText('County'), 'kilifi')
     await userEvent.selectOptions(screen.getByLabelText('Crop'), 'maize')
 
-    expect(screen.getByText('No farms match those filters')).toBeInTheDocument()
+    expect(screen.getByText('No farms in Kilifi yet')).toBeInTheDocument()
     expect(screen.queryAllByRole('article')).toHaveLength(0)
 
     await userEvent.click(screen.getAllByRole('button', { name: 'Clear all filters' })[0])
 
     expect(screen.getAllByRole('article')).toHaveLength(FARMS.length)
+  })
+
+  it('names the county when a county has no farms', async () => {
+    const user = userEvent.setup()
+    renderBrowse()
+
+    // Turkana has no seed farm listings.
+    await user.selectOptions(screen.getByLabelText(/county/i), 'turkana')
+
+    expect(await screen.findByText('No farms in Turkana yet')).toBeInTheDocument()
   })
 })

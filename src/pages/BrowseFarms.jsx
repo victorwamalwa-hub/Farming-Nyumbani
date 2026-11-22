@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import FarmCard from '../components/farms/FarmCard'
 import FarmFilters from '../components/farms/FarmFilters'
 import EmptyState from '../components/ui/EmptyState'
+import { getCountyName } from '../data/counties'
 import { FARMS } from '../data/seedFarms'
 import useDebouncedValue from '../hooks/useDebouncedValue'
 import useDocumentTitle from '../hooks/useDocumentTitle'
@@ -62,7 +63,11 @@ export default function BrowseFarms() {
           </div>
         ) : (
           <EmptyState
-            title="No farms match those filters"
+            title={
+              filters.county && filters.county !== 'all'
+                ? `No farms in ${getCountyName(filters.county)} yet`
+                : 'No farms match those filters'
+            }
             description={
               hasActiveFilters
                 ? 'Try widening the rent ceiling, choosing a different county, or clearing the search.'
