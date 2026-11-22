@@ -1,11 +1,11 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { FARMS } from '../data/seedFarms'
 import BrowseFarms from './BrowseFarms'
 
-afterEach(cleanup)
-
-function renderBrowseFarms() {
+function renderBrowse() {
   return render(
     <MemoryRouter>
       <BrowseFarms />
@@ -14,36 +14,44 @@ function renderBrowseFarms() {
 }
 
 describe('BrowseFarms', () => {
-  it('shows available seed farms and their detail links', () => {
-    renderBrowseFarms()
+  it('lists every farm by default', () => {
+    renderBrowse()
 
-    expect(screen.getByRole('heading', { name: 'Browse farms' })).toBeInTheDocument()
-    expect(screen.getByText('8 farms found')).toBeInTheDocument()
-    expect(
-      screen.getByRole('link', { name: 'One-acre horticulture plot, Ngoliba' }),
-    ).toHaveAttribute('href', '/farms/kiambu-ngoliba-tomato-block')
+    expect(screen.getAllByRole('article')).toHaveLength(FARMS.length)
+    expect(screen.getByText(`${FARMS.length} farms match your filters`)).toBeInTheDocument()
   })
 
-  it('filters farms by county and clears filters', () => {
-    renderBrowseFarms()
+  it('narrows the list when a county is chosen', async () => {
+    renderBrowse()
 
-    fireEvent.change(screen.getByLabelText('County'), { target: { value: 'nakuru' } })
+    await userEvent.selectOptions(screen.getByLabelText('County'), 'nakuru')
 
-    expect(screen.getByText('1 farm found')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Five-acre maize block, Rongai' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'One-acre horticulture plot, Ngoliba' })).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
-    expect(screen.getByText('8 farms found')).toBeInTheDocument()
+    expect(screen.getAllByRole('article')).toHaveLength(1)
+    expect(screen.getByText('Five-acre maize block, Rongai')).toBeInTheDocument()
+    expect(screen.queryByText('One-acre horticulture plot, Ngoliba')).not.toBeInTheDocument()
   })
 
-  it('shows an empty state when no farms match', () => {
-    renderBrowseFarms()
+  it('filters by crop', async () => {
+    renderBrowse()
 
-    fireEvent.change(screen.getByLabelText('Search farms'), {
-      target: { value: 'no matching farm' },
-    })
+    await userEvent.selectOptions(screen.getByLabelText('Crop'), 'avocado')
 
-    expect(screen.getByRole('heading', { name: 'No farms match those filters' })).toBeInTheDocument()
+    // Two listings can support the same crop: Murang'a (shared block) and Meru.
+    expect(screen.getAllByRole('article')).toHaveLength(2)
+    expect(screen.getByText('Four acres for avocado, Nkubu')).toBeInTheDocument()
+  })
+
+  it('shows an empty state when nothing matches, and recovers on reset', async () => {
+    renderBrowse()
+
+    await userEvent.selectOptions(screen.getByLabelText('County'), 'kilifi')
+    await userEvent.selectOptions(screen.getByLabelText('Crop'), 'maize')
+
+    expect(screen.getByText('No farms match those filters')).toBeInTheDocument()
+    expect(screen.queryAllByRole('article')).toHaveLength(0)
+
+    await userEvent.click(screen.getAllByRole('button', { name: 'Clear all filters' })[0])
+
+    expect(screen.getAllByRole('article')).toHaveLength(FARMS.length)
   })
 })
