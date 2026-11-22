@@ -5,11 +5,11 @@ import ProtectedRoute from './ProtectedRoute'
 import PublicOnlyRoute from './PublicOnlyRoute'
 
 const authState = vi.hoisted(() => ({
-  value: { user: null, loading: false, error: '' },
+  value: { user: null, initialising: false },
 }))
 
-vi.mock('../../hooks/useAuthUser', () => ({
-  default: () => authState.value,
+vi.mock('../../context/AuthContext', () => ({
+  useAuth: () => authState.value,
 }))
 
 function CurrentLocation() {
@@ -45,7 +45,7 @@ function renderPublicOnlyRoute() {
 
 describe('route guards', () => {
   beforeEach(() => {
-    authState.value = { user: null, loading: false, error: '' }
+    authState.value = { user: null, initialising: false }
   })
 
   it('redirects signed-out visitors to login and remembers the requested path', () => {
@@ -54,32 +54,20 @@ describe('route guards', () => {
   })
 
   it('renders protected content for signed-in visitors', () => {
-    authState.value = { user: { uid: 'user-1' }, loading: false, error: '' }
+    authState.value = { user: { uid: 'user-1' }, initialising: false }
     renderProtectedRoute()
     expect(screen.getByText('Protected area')).toBeInTheDocument()
   })
 
   it('redirects signed-in visitors away from public-only pages', () => {
-    authState.value = { user: { uid: 'user-1' }, loading: false, error: '' }
+    authState.value = { user: { uid: 'user-1' }, initialising: false }
     renderPublicOnlyRoute()
     expect(screen.getByText('Account page')).toBeInTheDocument()
   })
 
-  it('shows loading and authentication errors instead of rendering protected content', () => {
-    authState.value = { user: null, loading: true, error: '' }
-    const { rerender } = renderProtectedRoute()
-    expect(screen.getByRole('status')).toHaveTextContent('Checking your sign-in')
-
-    authState.value = { user: null, loading: false, error: 'Auth is unavailable' }
-    rerender(
-      <MemoryRouter initialEntries={['/account']}>
-        <Routes>
-          <Route element={<ProtectedRoute />}>
-            <Route path="/account" element={<p>Protected area</p>} />
-          </Route>
-        </Routes>
-      </MemoryRouter>,
-    )
-    expect(screen.getByRole('alert')).toHaveTextContent('Auth is unavailable')
+  it('shows a loading status while authentication is initialising', () => {
+    authState.value = { user: null, initialising: true }
+    renderProtectedRoute()
+    expect(screen.getByRole('status')).toHaveTextContent('Checking your session')
   })
 })

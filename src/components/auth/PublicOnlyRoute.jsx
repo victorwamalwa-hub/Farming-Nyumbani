@@ -1,20 +1,13 @@
 import { Navigate, Outlet } from 'react-router-dom'
-import useAuthUser from '../../hooks/useAuthUser'
+import { useAuth } from '../../context/AuthContext'
+import Spinner from '../ui/Spinner'
 
 export default function PublicOnlyRoute() {
-  const { user, loading, error } = useAuthUser()
+  const { user, initialising } = useAuth()
 
-  if (loading) {
-    return <p className="section py-10 text-muted" role="status">Checking your sign-in…</p>
-  }
+  if (initialising) return <Spinner label="Checking your session" />
 
-  if (error) {
-    return <p className="section py-10 text-danger" role="alert">{error}</p>
-  }
-
-  if (user) {
-    return <Navigate to="/account" replace />
-  }
+  if (user) return <Navigate to="/account" replace />
 
   return <Outlet />
 }
