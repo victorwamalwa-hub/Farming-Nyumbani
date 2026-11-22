@@ -1,91 +1,81 @@
 import { COUNTIES } from '../../data/counties'
-import { FARMS } from '../../data/seedFarms'
+import { CROPS } from '../../data/crops'
+import { WATER_SOURCES } from '../../utils/constants'
+import Input from '../ui/Input'
+import Select from '../ui/Select'
 
 export default function FarmFilters({ filters, onChange, onReset, resultCount }) {
-  const county = filters.county
-  const setCounty = (value) => onChange({ county: value })
-  const crops = [...new Set(FARMS.flatMap((farm) => farm.suitableCrops))].sort()
+  const countyOptions = [
+    { value: 'all', label: 'All counties' },
+    ...COUNTIES.map((county) => ({ value: county.slug, label: county.name })),
+  ]
+
+  const cropOptions = [
+    { value: 'all', label: 'Any crop' },
+    ...CROPS.map((crop) => ({ value: crop.slug, label: crop.name })),
+  ]
+
+  const waterOptions = [
+    { value: 'all', label: 'Any water source' },
+    ...WATER_SOURCES.map((source) => ({ value: source, label: source })),
+  ]
 
   return (
-    <section
-      aria-label="Farm filters"
-      className="grid gap-4 rounded-2xl border border-line bg-surface p-4 shadow-card sm:grid-cols-2 lg:grid-cols-4"
+    <form
+      className="rounded-xl border border-line bg-surface p-4 shadow-card sm:p-5"
+      onSubmit={(event) => event.preventDefault()}
+      aria-label="Filter farms"
     >
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink" htmlFor="farm-search">
-          Search
-        </label>
-        <input
-          className="w-full rounded-lg border border-line px-3 py-2"
-          id="farm-search"
-          onChange={(event) => onChange({ query: event.target.value })}
-          placeholder="Farm, owner, or location"
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <Input
+          label="Search"
           type="search"
+          placeholder="County, ward or crop"
           value={filters.query}
+          onChange={(event) => onChange({ query: event.target.value })}
         />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink" htmlFor="county-filter">
-          County
-        </label>
-        <select
-          className="w-full rounded-lg border border-line bg-white px-3 py-2"
-          id="county-filter"
-          value={county}
-          onChange={(e) => setCounty(e.target.value)}
-        >
-          <option value="">All counties</option>
-          {COUNTIES.map((c) => (
-            <option key={c.slug} value={c.slug}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink" htmlFor="crop-filter">
-          Crop
-        </label>
-        <select
-          className="w-full rounded-lg border border-line bg-white px-3 py-2 capitalize"
-          id="crop-filter"
-          onChange={(event) => onChange({ crop: event.target.value })}
+        <Select
+          label="County"
+          value={filters.county}
+          options={countyOptions}
+          onChange={(event) => onChange({ county: event.target.value })}
+        />
+        <Select
+          label="Crop"
           value={filters.crop}
-        >
-          <option value="">All crops</option>
-          {crops.map((crop) => (
-            <option key={crop} value={crop}>{crop.replaceAll('-', ' ')}</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink" htmlFor="rent-ceiling">
-          Maximum rent per season (KES)
-        </label>
-        <input
-          className="w-full rounded-lg border border-line px-3 py-2"
-          id="rent-ceiling"
-          min="0"
-          onChange={(event) => onChange({ maxRent: event.target.value })}
-          placeholder="Any rent"
+          options={cropOptions}
+          onChange={(event) => onChange({ crop: event.target.value })}
+        />
+        <Select
+          label="Water source"
+          value={filters.waterSource}
+          options={waterOptions}
+          onChange={(event) => onChange({ waterSource: event.target.value })}
+        />
+        <Input
+          label="Max rent (KES)"
           type="number"
+          min="0"
+          step="5000"
+          inputMode="numeric"
+          placeholder="Any budget"
           value={filters.maxRent}
+          onChange={(event) => onChange({ maxRent: event.target.value })}
         />
       </div>
 
-      <div className="flex items-center justify-between gap-3 sm:col-span-2 lg:col-span-4">
-        <p aria-live="polite" className="text-sm text-muted">
-          {resultCount} {resultCount === 1 ? 'farm' : 'farms'} match your filters
+      <div className="mt-4 flex flex-col gap-2 border-t border-line pt-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <p aria-live="polite" className="text-muted">
+          {resultCount} {resultCount === 1 ? 'farm matches' : 'farms match'} your filters
         </p>
         <button
-          className="text-sm font-semibold text-primary hover:underline"
-          onClick={onReset}
           type="button"
+          onClick={onReset}
+          className="self-start rounded-lg px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary-tint"
         >
           Clear all filters
         </button>
       </div>
-    </section>
+    </form>
   )
 }
