@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatAcres, rentLabel } from './format'
+import { formatAcres, initials, rentLabel } from './format'
 
 describe('formatAcres', () => {
   it('formats whole and decimal acre values', () => {
@@ -27,5 +27,15 @@ describe('rentLabel', () => {
 
   it('returns a fallback when rent is unavailable', () => {
     expect(rentLabel({})).toBe('Rent on request')
+  })
+})
+
+describe('initials', () => {
+  it('uses the first and last name initials', () => {
+    expect(initials('Wanjiku Mwangi')).toBe('WM')
+  })
+
+  it('returns a fallback for an empty name', () => {
+    expect(initials('')).toBe('?')
   })
 })
