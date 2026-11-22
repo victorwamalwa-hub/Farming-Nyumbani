@@ -35,3 +35,12 @@ describe('seedReviews', () => {
     expect(SEED_COMMENTS.length).toBeGreaterThan(0)
   })
 })
+
+it('orders reviews newest-first when read for a farm', () => {
+  const ngoliba = SEED_REVIEWS
+    .filter((r) => r.farmId === 'kiambu-ngoliba-tomato-block')
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  // review-ngoliba-02 (6 Feb) is newer than review-ngoliba-01 (18 Jan)
+  expect(ngoliba[0].id).toBe('review-ngoliba-02')
+  expect(ngoliba[1].id).toBe('review-ngoliba-01')
+})

@@ -26,8 +26,10 @@ export default function FarmDetail() {
     )
   }
 
-  const reviews = SEED_REVIEWS.filter((review) => review.farmId === farm.id)
-
+const reviews = SEED_REVIEWS
+  .filter((review) => review.farmId === farm.id)
+  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  
   return (
     <main className="section py-10 lg:py-14">
       <Link className="text-sm font-semibold text-primary hover:underline" to="/farms">
