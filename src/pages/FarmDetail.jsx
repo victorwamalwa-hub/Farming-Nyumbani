@@ -1,7 +1,8 @@
 import { Link, useParams } from 'react-router-dom'
 import { getCountyName } from '../data/counties'
 import { FARMS } from '../data/seedFarms'
-import { REVIEWS } from '../data/seedReviews'
+import { SEED_REVIEWS, SEED_COMMENTS } from '../data/seedReviews'
+import { formatDate, formatRating } from '../utils/format'
 
 const formatKes = new Intl.NumberFormat('en-KE', {
   style: 'currency',
@@ -25,7 +26,7 @@ export default function FarmDetail() {
     )
   }
 
-  const reviews = REVIEWS.filter((review) => review.farmId === farm.id)
+  const reviews = SEED_REVIEWS.filter((review) => review.farmId === farm.id)
 
   return (
     <main className="section py-10 lg:py-14">
@@ -108,10 +109,28 @@ export default function FarmDetail() {
             {reviews.map((review) => (
               <li className="rounded-xl border border-line bg-surface p-5" key={review.id}>
                 <p className="font-semibold text-ink">{review.author}</p>
-                <p aria-label={`${review.rating} out of 5 stars`} className="mt-1 text-sm text-primary">
-                  {review.rating}/5
+                <p aria-label={formatRating(review.rating)} className="mt-1 text-sm text-primary">
+                  {review.rating}/5 · {formatDate(review.createdAt)}
                 </p>
                 <p className="mt-3 text-sm leading-6 text-muted">{review.body}</p>
+                {(() => {
+                  const comments = SEED_COMMENTS.filter((comment) => comment.reviewId === review.id)
+                  return comments.length ? (
+                    <details className="mt-3 text-sm">
+                      <summary className="cursor-pointer font-semibold text-primary">
+                        {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
+                      </summary>
+                      <ul className="mt-2 space-y-2 border-l-2 border-line pl-3">
+                        {comments.map((comment) => (
+                          <li key={comment.id}>
+                            <p className="font-medium text-ink">{comment.author}</p>
+                            <p className="text-muted">{comment.body}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null
+                })()}
               </li>
             ))}
           </ul>

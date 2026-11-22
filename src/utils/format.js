@@ -37,3 +37,28 @@ export function initials(value) {
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
   return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase()
 }
+
+/**
+ * Human date for review timestamps: "18 Jan 2026".
+ * Returns an em dash for unparseable input.
+ */
+export function formatDate(value) {
+  if (!value) return '—'
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+/**
+ * Rating display: "5 out of 5", floored to integers in 1–5.
+ */
+export function formatRating(rating) {
+  const n = Math.round(Number(rating))
+  if (Number.isNaN(n)) return '—'
+  const clamped = Math.min(5, Math.max(1, n))
+  return `${clamped} out of 5`
+}
