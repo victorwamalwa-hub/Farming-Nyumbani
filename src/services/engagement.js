@@ -1,73 +1,84 @@
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-} from 'firebase/firestore'
-import { SEED_COMMENTS, SEED_REVIEWS } from '../data/seedReviews'
-import { db } from '../lib/firebase'
+import { db } from './firebase'
+import * as local from './engagementLocal'
+import * as remote from './engagementFirestore'
+import { createId, hasReacted, reactionCounts } from './engagementShared'
 
-function timestampValue(value) {
-  if (value && typeof value.toDate === 'function') return value.toDate().getTime()
-  if (value instanceof Date) return value.getTime()
-  const parsed = new Date(value).getTime()
-  return Number.isNaN(parsed) ? 0 : parsed
-}
+/**
+ * The engagement API used by the app. Two backends sit behind these functions:
+ *
+ *   Firebase configured  -> Firestore (shared across devices, rules enforced)
+ *   no Firebase keys     -> localStorage (this browser only, used by tests)
+ *
+ * Function names and arguments are unchanged from the local version; only the
+ * return values are now Promises, because a network database cannot answer
+ * synchronously. Callers await once and never care which backend answered.
+ *
+ * Auth is required for writes on the Firestore path: anything a visitor creates
+ * is tied to their account, which is what makes "delete, then restore from
+ * another device" work at all.
+ */
 
-function mergeById(...groups) {
-  return Array.from(
-    groups.flat().reduce((merged, item) => merged.set(item.id, item), new Map()).values(),
-  )
-}
+const isRemote = () => Boolean(db)
 
-export function assembleReviews({
-  farmId,
-  storedReviews = [],
-  comments = [],
-  reactions = [],
-}) {
-  const reviews = mergeById(
-    SEED_REVIEWS.filter((review) => review.farmId === farmId),
-    storedReviews.filter((review) => review.farmId === farmId),
-  )
-  const activeReviews = reviews.filter((review) => review.deletedAt == null)
-  const reviewIds = new Set(activeReviews.map((review) => review.id))
-  const allComments = mergeById(
-    SEED_COMMENTS.filter((comment) => reviewIds.has(comment.reviewId)),
-    comments.filter((comment) => reviewIds.has(comment.reviewId)),
-  ).filter((comment) => comment.deletedAt == null)
-
-  return activeReviews
-    .map((review) => ({
-      ...review,
-      comments: allComments.filter((comment) => comment.reviewId === review.id),
-      reactions: reactions.filter((reaction) => reaction.targetId === review.id),
-    }))
-    .sort((a, b) => timestampValue(b.createdAt) - timestampValue(a.createdAt))
-}
-
-function documents(snapshot) {
-  return snapshot.docs.map((document) => ({
-    ...document.data(),
-    id: document.id,
-  }))
-}
+export { createId, hasReacted, reactionCounts }
 
 export async function listReviews(farmId) {
-  if (!db) return assembleReviews({ farmId })
+  return isRemote() ? remote.listReviews(farmId) : local.listReviews(farmId)
+}
 
-  const readFarmCollection = async (name) => {
-    const snapshot = await getDocs(
-      query(collection(db, name), where('farmId', '==', farmId)),
-    )
-    return documents(snapshot)
-  }
+export async function addReview(payload) {
+  return isRemote() ? remote.addReview(payload) : local.addReview(payload)
+}
 
-  const [storedReviews, comments, reactions] = await Promise.all([
-    readFarmCollection('reviews'),
-    readFarmCollection('comments'),
-    readFarmCollection('reactions'),
-  ])
+export async function addComment(payload) {
+  return isRemote() ? remote.addComment(payload) : local.addComment(payload)
+}
 
-  return assembleReviews({ farmId, storedReviews, comments, reactions })
+export async function toggleReaction(payload) {
+  return isRemote() ? remote.toggleReaction(payload) : local.toggleReaction(payload)
+}
+
+export async function requestLease(payload) {
+  return isRemote() ? remote.requestLease(payload) : local.requestLease(payload)
+}
+
+/**
+ * `requester` is the display name, used only by the local backend. Firestore
+ * filters on the uid instead.
+ */
+export async function listMyLeaseRequests(requester) {
+  return isRemote() ? remote.listMyLeaseRequests() : local.listMyLeaseRequests(requester)
+}
+
+export async function reportFarm(payload) {
+  return isRemote() ? remote.reportFarm(payload) : local.reportFarm(payload)
+}
+
+export async function listReports(farmId) {
+  return isRemote() ? remote.listMyReports(farmId) : local.listReports(farmId)
+}
+
+/**
+ * `author` is the display name, which is how the local backend identifies rows.
+ * Firestore identifies them by uid instead, so the name is not used there - a
+ * display name is not unique, a uid is.
+ */
+export async function listMyContributions(author) {
+  return isRemote() ? remote.listMine() : local.listMyContributions(author)
+}
+
+export async function softDeleteItem(kind, id) {
+  return isRemote() ? remote.softDeleteItem(kind, id) : local.softDeleteItem(kind, id)
+}
+
+export async function restoreItem(kind, id) {
+  return isRemote() ? remote.restoreItem(kind, id) : local.restoreItem(kind, id)
+}
+
+export async function purgeItem(kind, id) {
+  return isRemote() ? remote.purgeItem(kind, id) : local.purgeItem(kind, id)
+}
+
+export async function listTrash(author) {
+  return isRemote() ? remote.listTrashMine() : local.listTrash(author)
 }
