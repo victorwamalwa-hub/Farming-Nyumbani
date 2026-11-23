@@ -1,11 +1,44 @@
 import { describe, expect, it } from 'vitest'
-import { validateLogin } from './validation'
+import { validateLogin, validateRegistration } from './validation'
 
 describe('validateLogin', () => {
   it('requires an email and password', () => {
     expect(validateLogin({ email: '', password: '' })).toEqual({
       email: 'Enter your email address.',
       password: 'Enter your password.',
+    })
+  })
+
+  describe('validateRegistration', () => {
+    it('reports all required fields', () => {
+      expect(validateRegistration({ name: '', email: '', password: '', confirmPassword: '' })).toEqual({
+        name: 'Enter your full name.',
+        email: 'Enter your email address.',
+        password: 'Enter a password.',
+      })
+    })
+
+    it('checks name length, email format, password length, and confirmation', () => {
+      expect(validateRegistration({
+        name: 'A',
+        email: 'not-an-email',
+        password: 'short',
+        confirmPassword: 'different',
+      })).toEqual({
+        name: 'Enter at least 2 characters.',
+        email: 'That email address does not look right.',
+        password: 'Use at least 8 characters.',
+        confirmPassword: 'Passwords do not match.',
+      })
+    })
+
+    it('accepts valid details and trims name and email for validation', () => {
+      expect(validateRegistration({
+        name: '  Amina Yusuf ',
+        email: ' amina@example.com ',
+        password: 'secret123',
+        confirmPassword: 'secret123',
+      })).toEqual({})
     })
   })
 
