@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCountyName } from '../data/counties'
 import { FARMS } from '../data/seedFarms'
-import { SEED_REVIEWS, SEED_COMMENTS } from '../data/seedReviews'
+import { listReviews } from '../services/engagement'
 import { formatDate, formatRating } from '../utils/format'
 
 const formatKes = new Intl.NumberFormat('en-KE', {
@@ -13,6 +14,36 @@ const formatKes = new Intl.NumberFormat('en-KE', {
 export default function FarmDetail() {
   const { farmId } = useParams()
   const farm = FARMS.find((listing) => listing.id === farmId)
+  const [reviewState, setReviewState] = useState({
+    farmId: null,
+    reviews: [],
+    loading: true,
+    error: '',
+  })
+
+  useEffect(() => {
+    if (!farm) return undefined
+
+    let active = true
+
+    async function loadReviews() {
+      try {
+        const farmReviews = await listReviews(farm.id)
+        if (active) {
+          setReviewState({ farmId: farm.id, reviews: farmReviews, loading: false, error: '' })
+        }
+      } catch (error) {
+        if (active) {
+          setReviewState({ farmId: farm.id, reviews: [], loading: false, error: error.message })
+        }
+      }
+    }
+
+    loadReviews()
+    return () => {
+      active = false
+    }
+  }, [farm])
 
   if (!farm) {
     return (
@@ -26,10 +57,11 @@ export default function FarmDetail() {
     )
   }
 
-const reviews = SEED_REVIEWS
-  .filter((review) => review.farmId === farm.id)
-  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  
+  const currentReviewState = reviewState.farmId === farm.id
+    ? reviewState
+    : { reviews: [], loading: true, error: '' }
+  const { reviews, loading: reviewsLoading, error: reviewsError } = currentReviewState
+
   return (
     <main className="section py-10 lg:py-14">
       <Link className="text-sm font-semibold text-primary hover:underline" to="/farms">
@@ -106,6 +138,8 @@ const reviews = SEED_REVIEWS
         <h2 className="font-display text-2xl font-semibold text-ink" id="reviews-title">
           Farmer reviews
         </h2>
+        {reviewsLoading && <p className="mt-3 text-muted">Loading reviews...</p>}
+        {reviewsError && <p className="mt-3 text-danger" role="alert">{reviewsError}</p>}
         {reviews.length ? (
           <ul className="mt-4 grid list-none gap-4 p-0 md:grid-cols-2">
             {reviews.map((review) => (
@@ -115,30 +149,27 @@ const reviews = SEED_REVIEWS
                   {review.rating}/5 · {formatDate(review.createdAt)}
                 </p>
                 <p className="mt-3 text-sm leading-6 text-muted">{review.body}</p>
-                {(() => {
-                  const comments = SEED_COMMENTS.filter((comment) => comment.reviewId === review.id)
-                  return comments.length ? (
-                    <details className="mt-3 text-sm">
-                      <summary className="cursor-pointer font-semibold text-primary">
-                        {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
-                      </summary>
-                      <ul className="mt-2 space-y-2 border-l-2 border-line pl-3">
-                        {comments.map((comment) => (
-                          <li key={comment.id}>
-                            <p className="font-medium text-ink">{comment.author}</p>
-                            <p className="text-muted">{comment.body}</p>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  ) : null
-                })()}
+                {review.comments.length > 0 && (
+                  <details className="mt-3 text-sm">
+                    <summary className="cursor-pointer font-semibold text-primary">
+                      {review.comments.length} {review.comments.length === 1 ? 'comment' : 'comments'}
+                    </summary>
+                    <ul className="mt-2 space-y-2 border-l-2 border-line pl-3">
+                      {review.comments.map((comment) => (
+                        <li key={comment.id}>
+                          <p className="font-medium text-ink">{comment.author}</p>
+                          <p className="text-muted">{comment.body}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
               </li>
             ))}
           </ul>
-        ) : (
+        ) : !reviewsLoading && !reviewsError ? (
           <p className="mt-3 text-muted">No reviews yet.</p>
-        )}
+        ) : null}
       </section>
     </main>
   )

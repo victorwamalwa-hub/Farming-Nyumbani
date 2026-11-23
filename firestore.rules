@@ -44,6 +44,9 @@ service cloud.firestore {
 
       allow update: if signedIn()
         && resource.data.authorId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedAt'])
+        && (request.resource.data.deletedAt == null
+          || request.resource.data.deletedAt is timestamp)
         && untouched('authorId')
         && untouched('farmId')
         && untouched('author')
@@ -71,6 +74,9 @@ service cloud.firestore {
 
       allow update: if signedIn()
         && resource.data.authorId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedAt'])
+        && (request.resource.data.deletedAt == null
+          || request.resource.data.deletedAt is timestamp)
         && untouched('authorId')
         && untouched('farmId')
         && untouched('reviewId')

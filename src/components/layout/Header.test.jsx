@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
@@ -39,6 +39,16 @@ describe('Header', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Menu' }))
 
     await userEvent.keyboard('{Escape}')
+
+    expect(screen.queryByRole('navigation', { name: 'Mobile' })).not.toBeInTheDocument()
+  })
+
+  it('closes the mobile menu after choosing a navigation link', async () => {
+    renderHeader()
+    await userEvent.click(screen.getByRole('button', { name: 'Menu' }))
+
+    const mobileNavigation = screen.getByRole('navigation', { name: 'Mobile' })
+    await userEvent.click(within(mobileNavigation).getByRole('link', { name: 'Crops & regions' }))
 
     expect(screen.queryByRole('navigation', { name: 'Mobile' })).not.toBeInTheDocument()
   })

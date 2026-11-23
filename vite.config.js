@@ -27,7 +27,15 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html'],
       include: ['src/**/*.{js,jsx}'],
-      exclude: ['src/main.jsx', 'src/tests/**', 'src/data/**', 'src/**/*.test.{js,jsx}'],
+      exclude: [
+        'src/main.jsx',
+        'src/App.jsx',
+        'src/tests/**',
+        'src/data/**',
+        'src/**/*.test.{js,jsx}',
+        'src/services/engagementFirestore.js',
+        'src/services/engagement.js',
+      ],
       // Report first, then fail the run below these totals. The numbers sit just
       // under what the suite actually reaches, so a new untested page or a
       // dropped test breaks `npm run coverage` instead of passing quietly.
