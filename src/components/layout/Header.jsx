@@ -109,7 +109,7 @@ export default function Header() {
               >
                 Log in
               </Link>
-              <Button to="/register" variant="accent" size="sm">
+              <Button to="/register" variant="accent" size="md">
                 Sign up
               </Button>
             </>
