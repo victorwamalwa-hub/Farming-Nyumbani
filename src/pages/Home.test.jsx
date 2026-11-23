@@ -40,4 +40,20 @@ describe('Home', () => {
     expect(steps[0]).toHaveTextContent('Find a plot that fits')
     expect(steps[2]).toHaveTextContent('Farm the season')
   })
+
+  it('has exactly one h1', () => {
+    renderHome()
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+  })
+
+  it('sets the document title through useDocumentTitle', () => {
+    renderHome()
+    expect(document.title).toContain('Farming Nyumbani')
+  })
+
+  it('uses h2 for section headings', () => {
+    renderHome()
+    const headings = screen.getAllByRole('heading', { level: 2 })
+    expect(headings.length).toBeGreaterThanOrEqual(5)
+  })
 })
