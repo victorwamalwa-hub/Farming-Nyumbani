@@ -88,25 +88,25 @@ describe('addComment', () => {
 
 describe('toggleReaction', () => {
   it('adds a reaction then removes it on the second click', async () => {
-    const added = await toggleReaction({ targetId: 'review-ngoliba-01', emoji: '🌱', actor: 'Kevin' })
+    const added = await toggleReaction({ targetId: 'review-ngoliba-01', emoji: 'leaf', actor: 'Kevin' })
     expect(added).toHaveLength(1)
-    expect(hasReacted(added, '🌱', 'Kevin')).toBe(true)
+    expect(hasReacted(added, 'leaf', 'Kevin')).toBe(true)
 
-    const removed = await toggleReaction({ targetId: 'review-ngoliba-01', emoji: '🌱', actor: 'Kevin' })
+    const removed = await toggleReaction({ targetId: 'review-ngoliba-01', emoji: 'leaf', actor: 'Kevin' })
     expect(removed).toHaveLength(0)
-    expect(hasReacted(removed, '🌱', 'Kevin')).toBe(false)
+    expect(hasReacted(removed, 'leaf', 'Kevin')).toBe(false)
   })
 
   it('keeps reactions from different people separate', async () => {
-    await toggleReaction({ targetId: 'review-ngoliba-01', emoji: '🌱', actor: 'Kevin' })
-    await toggleReaction({ targetId: 'review-ngoliba-01', emoji: '🌱', actor: 'Amina' })
+    await toggleReaction({ targetId: 'review-ngoliba-01', emoji: 'leaf', actor: 'Kevin' })
+    await toggleReaction({ targetId: 'review-ngoliba-01', emoji: 'leaf', actor: 'Amina' })
 
     const review = (await listReviews(FARM)).find((item) => item.id === 'review-ngoliba-01')
-    expect(reactionCounts(review.reactions)).toEqual({ '🌱': 2 })
+    expect(reactionCounts(review.reactions)).toEqual({ 'leaf': 2 })
   })
 
   it('does not affect another target', async () => {
-    await toggleReaction({ targetId: 'review-ngoliba-02', emoji: '⚠️', actor: 'Kevin' })
+    await toggleReaction({ targetId: 'review-ngoliba-02', emoji: 'warning', actor: 'Kevin' })
 
     const first = (await listReviews(FARM)).find((item) => item.id === 'review-ngoliba-01')
     expect(first.reactions).toHaveLength(0)
