@@ -1,4 +1,6 @@
 export const MIN_REVIEW_LENGTH = 20
+export const MAX_REVIEW_LENGTH = 1200
+export const MAX_COMMENT_LENGTH = 300
 
 export const SEED_REVIEWS = [  {
     id: 'review-ngoliba-01',

@@ -14,13 +14,18 @@ function renderFarmDetail(path) {
 }
 
 describe('FarmDetail', () => {
-  it('shows listing details and reviews for a known farm', async () => {
+  it('shows listing details for a known farm', () => {
     renderFarmDetail('/farms/kiambu-ngoliba-tomato-block')
 
     expect(screen.getByRole('heading', { name: 'One-acre horticulture plot, Ngoliba' })).toBeInTheDocument()
     expect(screen.getByText('Wanjiku Mwangi')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Request this lease' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Report this listing' })).toBeInTheDocument()
+  })
+
+  it('shows the review section', async () => {
+    renderFarmDetail('/farms/kiambu-ngoliba-tomato-block')
+
     expect(screen.getByRole('heading', { name: 'Farmer reviews' })).toBeInTheDocument()
     expect(await screen.findByText(/Clear farm details/)).toBeInTheDocument()
     expect(screen.getByText('5 out of 5 · 18 Jan 2026')).toBeInTheDocument()
