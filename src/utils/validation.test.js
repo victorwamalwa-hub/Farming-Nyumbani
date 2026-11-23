@@ -1,11 +1,60 @@
 import { describe, expect, it } from 'vitest'
-import { validateLogin, validateRegistration } from './validation'
+import {
+  LEASE_REPORT_REASONS,
+  validateLeaseRequest,
+  validateLogin,
+  validateRegistration,
+  validateReport,
+} from './validation'
 
 describe('validateLogin', () => {
   it('requires an email and password', () => {
     expect(validateLogin({ email: '', password: '' })).toEqual({
       email: 'Enter your email address.',
       password: 'Enter your password.',
+    })
+  })
+
+  describe('validateLeaseRequest', () => {
+    it('requires a name, crop plan, and a message of at least 10 characters', () => {
+      expect(validateLeaseRequest({ name: ' ', crops: '', message: 'hi' })).toEqual({
+        name: 'Tell the owner who is asking.',
+        crops: 'Say what you plan to grow.',
+        message: 'Use at least 10 characters.',
+      })
+    })
+
+    it('accepts a complete request', () => {
+      expect(validateLeaseRequest({
+        name: 'Amina',
+        crops: 'maize',
+        message: 'I would like to lease this farm.',
+      })).toEqual({})
+    })
+
+    it('enforces Firestore field length limits', () => {
+      expect(validateLeaseRequest({
+        name: 'A'.repeat(41),
+        crops: 'c'.repeat(81),
+        message: 'm'.repeat(501),
+      })).toEqual({
+        name: 'Keep your name under 40 characters.',
+        crops: 'Keep your crop plan under 80 characters.',
+        message: 'Keep your message under 500 characters.',
+      })
+    })
+  })
+
+  describe('validateReport', () => {
+    it('requires a listed reason and caps the optional note at 300 characters', () => {
+      expect(validateReport({ reason: 'not-listed', note: 'x'.repeat(301) })).toEqual({
+        reason: 'Choose one of the listed reasons.',
+        note: 'Keep the note under 300 characters.',
+      })
+    })
+
+    it('accepts a listed reason and note within the limit', () => {
+      expect(validateReport({ reason: LEASE_REPORT_REASONS[0], note: 'Please verify this location.' })).toEqual({})
     })
   })
 

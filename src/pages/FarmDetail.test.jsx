@@ -19,6 +19,8 @@ describe('FarmDetail', () => {
 
     expect(screen.getByRole('heading', { name: 'One-acre horticulture plot, Ngoliba' })).toBeInTheDocument()
     expect(screen.getByText('Wanjiku Mwangi')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Request this lease' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Report this listing' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Farmer reviews' })).toBeInTheDocument()
     expect(await screen.findByText(/Clear farm details/)).toBeInTheDocument()
     expect(screen.getByText('5/5 · 18 Jan 2026')).toBeInTheDocument()
