@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 
 /**
  * Shared shell for the sign-in and register pages: optional notice above the
