@@ -30,16 +30,19 @@ afterEach(() => {
 describe('listReviews', () => {
   it('returns the sample reviews for a farm, newest first', async () => {
     const reviews = await listReviews(FARM)
-    expect(reviews.map((review) => review.id)).toEqual(['seed-rev-1', 'seed-rev-2'])
+    expect(reviews.map((review) => review.id)).toEqual(['review-ngoliba-02', 'review-ngoliba-01'])
   })
 
   it('attaches comments in chronological order', async () => {
-    const [newest] = await listReviews(FARM)
-    expect(newest.comments.map((comment) => comment.id)).toEqual(['seed-cmt-1', 'seed-cmt-2'])
+    const review = (await listReviews(FARM)).find((item) => item.id === 'review-ngoliba-01')
+    expect(review.comments.map((comment) => comment.id)).toEqual([
+      'comment-ngoliba-01',
+      'comment-ngoliba-02',
+    ])
   })
 
   it('returns an empty list for a farm with no reviews', async () => {
-    expect(await listReviews('kakamega-lurambi-mixed')).toEqual([])
+    expect(await listReviews('unknown-farm')).toEqual([])
   })
 })
 
@@ -69,15 +72,15 @@ describe('addReview', () => {
     })
 
     expect(await listReviews(FARM)).toHaveLength(2)
-    expect(await listReviews('kakamega-lurambi-mixed')).toHaveLength(1)
+    expect(await listReviews('kakamega-lurambi-mixed')).toHaveLength(2)
   })
 })
 
 describe('addComment', () => {
   it('adds a comment to a review and keeps it after re-reading', async () => {
-    await addComment({ reviewId: 'seed-rev-1', author: 'Kevin', body: 'Was the pump extra?' })
+    await addComment({ reviewId: 'review-ngoliba-01', author: 'Kevin', body: 'Was the pump extra?' })
 
-    const review = (await listReviews(FARM)).find((item) => item.id === 'seed-rev-1')
+    const review = (await listReviews(FARM)).find((item) => item.id === 'review-ngoliba-01')
     expect(review.comments).toHaveLength(3)
     expect(review.comments[2].body).toBe('Was the pump extra?')
   })
@@ -85,27 +88,27 @@ describe('addComment', () => {
 
 describe('toggleReaction', () => {
   it('adds a reaction then removes it on the second click', async () => {
-    const added = await toggleReaction({ targetId: 'seed-rev-1', emoji: '🌱', actor: 'Kevin' })
+    const added = await toggleReaction({ targetId: 'review-ngoliba-01', emoji: '🌱', actor: 'Kevin' })
     expect(added).toHaveLength(1)
     expect(hasReacted(added, '🌱', 'Kevin')).toBe(true)
 
-    const removed = await toggleReaction({ targetId: 'seed-rev-1', emoji: '🌱', actor: 'Kevin' })
+    const removed = await toggleReaction({ targetId: 'review-ngoliba-01', emoji: '🌱', actor: 'Kevin' })
     expect(removed).toHaveLength(0)
     expect(hasReacted(removed, '🌱', 'Kevin')).toBe(false)
   })
 
   it('keeps reactions from different people separate', async () => {
-    await toggleReaction({ targetId: 'seed-rev-1', emoji: '🌱', actor: 'Kevin' })
-    await toggleReaction({ targetId: 'seed-rev-1', emoji: '🌱', actor: 'Amina' })
+    await toggleReaction({ targetId: 'review-ngoliba-01', emoji: '🌱', actor: 'Kevin' })
+    await toggleReaction({ targetId: 'review-ngoliba-01', emoji: '🌱', actor: 'Amina' })
 
-    const review = (await listReviews(FARM)).find((item) => item.id === 'seed-rev-1')
+    const review = (await listReviews(FARM)).find((item) => item.id === 'review-ngoliba-01')
     expect(reactionCounts(review.reactions)).toEqual({ '🌱': 2 })
   })
 
   it('does not affect another target', async () => {
-    await toggleReaction({ targetId: 'seed-rev-2', emoji: '⚠️', actor: 'Kevin' })
+    await toggleReaction({ targetId: 'review-ngoliba-02', emoji: '⚠️', actor: 'Kevin' })
 
-    const first = (await listReviews(FARM)).find((item) => item.id === 'seed-rev-1')
+    const first = (await listReviews(FARM)).find((item) => item.id === 'review-ngoliba-01')
     expect(first.reactions).toHaveLength(0)
   })
 })
@@ -145,15 +148,15 @@ describe('delete and restore', () => {
 
   it('hides deleted comments but keeps the review visible', async () => {
     const comment = await addComment({
-      reviewId: 'seed-rev-1',
+      reviewId: 'review-ngoliba-01',
       author: 'Amina',
       body: 'Thanks for this.',
     })
     await softDeleteItem('comments', comment.id)
 
-    const review = (await listReviews(FARM)).find((item) => item.id === 'seed-rev-1')
+    const review = (await listReviews(FARM)).find((item) => item.id === 'review-ngoliba-01')
     expect(review.comments.some((item) => item.id === comment.id)).toBe(false)
-    expect((await listReviews(FARM)).some((item) => item.id === 'seed-rev-1')).toBe(true)
+    expect((await listReviews(FARM)).some((item) => item.id === 'review-ngoliba-01')).toBe(true)
   })
 
   it('keeps deleted items out of the contributions list', async () => {
@@ -232,7 +235,7 @@ describe('failed writes', () => {
   }
 
   it('reports a full or blocked storage instead of claiming the review saved', async () => {
-    vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {
+    vi.spyOn(Object.getPrototypeOf(window.localStorage), 'setItem').mockImplementation(() => {
       throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
     })
 
@@ -243,7 +246,7 @@ describe('failed writes', () => {
   })
 
   it('catches a browser that accepts the write and then drops it', async () => {
-    vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {})
+    vi.spyOn(Object.getPrototypeOf(window.localStorage), 'setItem').mockImplementation(() => {})
 
     await expect(requestLease({ ...REVIEW, requester: 'Amina' })).rejects.toThrow(
       /nothing was saved/i,
@@ -253,7 +256,7 @@ describe('failed writes', () => {
 
   it('reports a failed delete rather than showing the item as gone', async () => {
     const created = await addReview(REVIEW)
-    vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {
+    vi.spyOn(Object.getPrototypeOf(window.localStorage), 'setItem').mockImplementation(() => {
       throw new DOMException('Blocked in private mode.', 'SecurityError')
     })
 

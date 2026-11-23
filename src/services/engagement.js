@@ -1,4 +1,4 @@
-import { db } from './firebase'
+import { db } from '../lib/firebase'
 import * as local from './engagementLocal'
 import * as remote from './engagementFirestore'
 import { createId, hasReacted, reactionCounts } from './engagementShared'
