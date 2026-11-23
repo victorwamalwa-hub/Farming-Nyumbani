@@ -1,30 +1,38 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { authErrorMessage } from '../../utils/AuthErrors'
 
-export default function GoogleButton({ onSuccess, onError, className = '' }) {
-  const { signInWithGoogle } = useAuth()
-  const [submitting, setSubmitting] = useState(false)
+/**
+ * Google sign-in. Hidden in local mode (no Firebase keys) — a dead button is
+ * worse than no button. Disabled while pending. Failures go through onError;
+ * success through onSuccess; never leaves a spinner stuck.
+ */
+export default function GoogleButton({ onError, onSuccess }) {
+  const { mode, signInWithGoogle } = useAuth()
+  const [pending, setPending] = useState(false)
+
+  if (mode !== 'firebase') return null
 
   async function handleClick() {
-    setSubmitting(true)
+    setPending(true)
     try {
       const user = await signInWithGoogle()
       onSuccess?.(user)
     } catch (error) {
-      onError?.(error)
+      onError?.(authErrorMessage(error))
     } finally {
-      setSubmitting(false)
+      setPending(false)
     }
   }
 
   return (
     <button
-      className={`w-full rounded-lg border border-line bg-surface px-4 py-3 font-semibold text-ink hover:bg-paper disabled:opacity-60 ${className}`.trim()}
-      disabled={submitting}
+      className="w-full rounded-lg border border-line bg-surface px-4 py-3 font-semibold text-ink hover:border-primary disabled:opacity-60"
+      disabled={pending}
       onClick={handleClick}
       type="button"
     >
-      {submitting ? 'Connecting…' : 'Continue with Google'}
+      {pending ? 'Opening Google…' : 'Continue with Google'}
     </button>
   )
 }
