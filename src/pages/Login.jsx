@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AuthCard from '../components/auth/AuthCard'
+import GoogleButton from '../components/auth/GoogleButton'
 import { auth } from '../lib/firebase'
 import { authErrorMessage } from '../utils/AuthErrors'
 
@@ -80,6 +81,11 @@ export default function Login() {
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
+        <GoogleButton
+          className="mt-4"
+          onError={(googleError) => setError(googleError.message)}
+          onSuccess={() => navigate(location.state?.from?.pathname || '/account', { replace: true })}
+        />
     </AuthCard>
   )
 }

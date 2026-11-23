@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthCard from '../components/auth/AuthCard'
+import GoogleButton from '../components/auth/GoogleButton'
 import { auth } from '../lib/firebase'
 import { authErrorMessage } from '../utils/AuthErrors'
 
@@ -115,6 +116,11 @@ export default function Register() {
             {submitting ? 'Creating account…' : 'Create account'}
           </button>
         </form>
+        <GoogleButton
+          className="mt-4"
+          onError={(googleError) => setError(googleError.message)}
+          onSuccess={() => navigate('/account', { replace: true })}
+        />
     </AuthCard>
   )
 }
