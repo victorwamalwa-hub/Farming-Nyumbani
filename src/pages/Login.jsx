@@ -3,6 +3,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AuthCard from '../components/auth/AuthCard'
 import GoogleButton from '../components/auth/GoogleButton'
+import LocalModeNotice from '../components/auth/LocalModeNotice'
 import { auth } from '../lib/firebase'
 import { authErrorMessage } from '../utils/AuthErrors'
 
@@ -34,6 +35,7 @@ export default function Login() {
       eyebrow="Welcome back"
       title="Sign in"
       description="Sign in to manage your farming account and requests."
+      notice={<LocalModeNotice className="mb-4" />}
       footer={
         <>
           New to Farming Nyumbani?{' '}
@@ -80,12 +82,11 @@ export default function Login() {
           >
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
+          <GoogleButton
+            onError={setError}
+            onSuccess={() => navigate(location.state?.from?.pathname || '/account', { replace: true })}
+          />
         </form>
-        <GoogleButton
-          className="mt-4"
-          onError={(googleError) => setError(googleError.message)}
-          onSuccess={() => navigate(location.state?.from?.pathname || '/account', { replace: true })}
-        />
     </AuthCard>
   )
 }
