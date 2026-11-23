@@ -14,21 +14,19 @@ export function formatAcres(acres) {
 
 /**
  * Build the rent label from a farm's rentKes + rentPeriod.
- * Uses en-KE so it renders as "KES 45,000 / season". Falls back to a
- * readable string when rent is missing or non-numeric.
+ * Uses a stable "KES 45,000 / season" label across browser locales. Falls back
+ * to a readable string when rent is missing or non-numeric.
  */
 export function rentLabel(farm) {
   const rent = farm?.rentKes
   if (rent == null || Number.isNaN(Number(rent))) return 'Rent on request'
 
-  const kes = new Intl.NumberFormat('en-KE', {
-    style: 'currency',
-    currency: 'KES',
+  const amount = new Intl.NumberFormat('en-KE', {
     maximumFractionDigits: 0,
   }).format(Number(rent))
 
   const period = farm?.rentPeriod ? ` / ${farm.rentPeriod}` : ''
-  return `${kes}${period}`
+  return `KES ${amount}${period}`
 }
 
 export function initials(value) {
