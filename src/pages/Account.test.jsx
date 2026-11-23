@@ -15,11 +15,15 @@ vi.mock('../context/AuthContext', () => ({
 
 const engagementMock = vi.hoisted(() => ({
   listMyContributions: vi.fn(),
-  listMyLeaseRequests: vi.fn(),
   listDeletedContributions: vi.fn(),
   restoreContribution: vi.fn(),
 }))
 vi.mock('../lib/engagement', () => engagementMock)
+
+const leaseRequestsMock = vi.hoisted(() => ({
+  listMyLeaseRequests: vi.fn(),
+}))
+vi.mock('../services/engagement', () => leaseRequestsMock)
 
 const navigateMock = vi.hoisted(() => vi.fn())
 vi.mock('react-router-dom', async () => {
@@ -48,7 +52,7 @@ describe('Account', () => {
     authMock.initialising = false
     authMock.signOut.mockResolvedValue()
     engagementMock.listMyContributions.mockResolvedValue({ reviews: [], comments: [], reports: [] })
-    engagementMock.listMyLeaseRequests.mockResolvedValue([])
+    leaseRequestsMock.listMyLeaseRequests.mockResolvedValue([])
     engagementMock.listDeletedContributions.mockResolvedValue([])
     engagementMock.restoreContribution.mockResolvedValue(true)
   })
@@ -60,6 +64,7 @@ describe('Account', () => {
     expect(screen.getByText('amina@example.com')).toBeInTheDocument()
     expect(screen.getByText(/member since/i)).toBeInTheDocument()
     await waitFor(() => expect(engagementMock.listMyContributions).toHaveBeenCalledTimes(1))
+    expect(leaseRequestsMock.listMyLeaseRequests).toHaveBeenCalledWith('Amina Farmer')
     expect(await screen.findByText('No reviews yet')).toBeInTheDocument()
     expect(screen.getByText('No lease requests yet')).toBeInTheDocument()
     expect(screen.getByText('Nothing in the bin')).toBeInTheDocument()
@@ -82,7 +87,7 @@ describe('Account', () => {
   })
 
   it('renders lease requests with their status', async () => {
-    engagementMock.listMyLeaseRequests.mockResolvedValue([
+    leaseRequestsMock.listMyLeaseRequests.mockResolvedValue([
       {
         id: 'lr1',
         farmTitle: 'Ngoliba Tomato Block',

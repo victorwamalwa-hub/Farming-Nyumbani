@@ -9,9 +9,9 @@ import RecentlyDeleted from '../components/account/RecentlyDeleted'
 import {
   listDeletedContributions,
   listMyContributions,
-  listMyLeaseRequests,
   restoreContribution,
 } from '../lib/engagement'
+import { listMyLeaseRequests } from '../services/engagement'
 
 function initialsOf(name, email) {
   const source = (name || email || '').trim()
@@ -23,6 +23,10 @@ function initialsOf(name, email) {
 
 function displayNameOf(user) {
   return user.accountName || user.displayName || user.email?.split('@')[0] || '—'
+}
+
+function requesterNameOf(user) {
+  return user.displayName || user.accountName || user.email?.split('@')[0] || ''
 }
 
 function signInMethod(user) {
@@ -49,7 +53,7 @@ function newestFirst(a, b) {
 async function fetchAccountData(user) {
   const [contributions, leaseRequests, deleted] = await Promise.all([
     listMyContributions(user),
-    listMyLeaseRequests(user),
+    listMyLeaseRequests(requesterNameOf(user)),
     listDeletedContributions(user),
   ])
   return { contributions, leaseRequests, deleted }

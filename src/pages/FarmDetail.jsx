@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import LeaseRequestForm from '../components/farms/LeaseRequestForm'
+import ReportListing from '../components/farms/ReportListing'
 import { getCountyName } from '../data/counties'
 import { FARMS } from '../data/seedFarms'
 import { listReviews } from '../services/engagement'
@@ -125,14 +127,10 @@ export default function FarmDetail() {
           </ul>
         </div>
 
-        <Link
-          className="mt-8 inline-flex rounded-lg bg-primary px-5 py-3 font-semibold text-white hover:bg-primary-dark"
-          to="/login"
-          state={{ from: { pathname: `/farms/${farm.id}` } }}
-        >
-          Sign in to request this farm
-        </Link>
       </article>
+
+      <LeaseRequestForm farm={farm} />
+      <ReportListing farm={farm} />
 
       <section aria-labelledby="reviews-title" className="mt-10">
         <h2 className="font-display text-2xl font-semibold text-ink" id="reviews-title">
