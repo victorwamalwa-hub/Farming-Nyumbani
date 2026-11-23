@@ -1,13 +1,32 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import NotFound from './NotFound'
 
-describe('NotFound', () => {
-  it('explains the page was not found and provides a home link', () => {
-    render(<MemoryRouter><NotFound /></MemoryRouter>)
+afterEach(() => {
+  document.title = ''
+})
 
-    expect(screen.getByRole('heading', { name: 'This page could not be found' })).toBeInTheDocument()
+describe('NotFound', () => {
+  it('explains the page was not found and provides both recovery links', () => {
+    render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/could not find that page/i)
     expect(screen.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Browse farms' })).toHaveAttribute('href', '/farms')
+  })
+
+  it('sets the document title to "Page not found"', () => {
+    render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>,
+    )
+
+    expect(document.title).toBe('Page not found | Farming Nyumbani')
   })
 })
