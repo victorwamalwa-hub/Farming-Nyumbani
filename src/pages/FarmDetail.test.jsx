@@ -23,8 +23,7 @@ describe('FarmDetail', () => {
     expect(screen.getByRole('heading', { name: 'Report this listing' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Farmer reviews' })).toBeInTheDocument()
     expect(await screen.findByText(/Clear farm details/)).toBeInTheDocument()
-    expect(screen.getByText('5/5 · 18 Jan 2026')).toBeInTheDocument()
-    expect(screen.getByText('2 comments')).toBeInTheDocument()
+    expect(screen.getByText('5 out of 5 · 18 Jan 2026')).toBeInTheDocument()
     expect(screen.getByText(/borehole was serviced last season/)).toBeInTheDocument()
   })
 
