@@ -25,7 +25,7 @@ export default function AuthCard({
           {children}
         </section>
         {footer && (
-          <p className="mt-5 text-center text-sm text-muted">{footer}</p>
+          <div className="mt-5 text-center text-sm text-muted">{footer}</div>
         )}
       </div>
     </main>

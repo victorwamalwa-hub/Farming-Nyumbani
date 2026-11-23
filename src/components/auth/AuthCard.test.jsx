@@ -19,7 +19,7 @@ describe('AuthCard', () => {
   })
 
   it('renders the notice above the card and footer below', () => {
-    render(
+    const { container } = render(
       <MemoryRouter>
         <AuthCard title="Sign in" notice={<p>notice</p>} footer={<p>footer</p>}>
           <p>body</p>
@@ -28,5 +28,6 @@ describe('AuthCard', () => {
     )
     expect(screen.getByText('notice')).toBeInTheDocument()
     expect(screen.getByText('footer')).toBeInTheDocument()
+    expect(container.querySelector('p p')).toBeNull()
   })
 })
