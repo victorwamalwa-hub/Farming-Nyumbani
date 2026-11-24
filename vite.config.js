@@ -2,10 +2,9 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  // Defaults to the site root for local development and tests. The Pages deploy
-  // workflow sets VITE_BASE_PATH to /<repo>/ because a project site is served
-  // from a subpath, and every asset URL has to include it.
-  base: process.env.VITE_BASE_PATH || '/',
+  // GitHub Pages serves this project from the repository subpath.
+  // VITE_BASE_PATH can override this for deployments in a different repository.
+  base: process.env.VITE_BASE_PATH || '/Farming-Nyumbani/',
   plugins: [react()],
   server: {
     // Extra allowed hosts (e.g. a cloud preview domain) come from the environment,

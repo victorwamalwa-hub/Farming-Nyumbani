@@ -130,8 +130,8 @@ deploy job only runs on `main`, and only after its own build succeeds.
 The project site is served from a subpath, so the workflow passes
 `VITE_BASE_PATH=${{ steps.pages.outputs.base_path }}` into the build. `vite.config.js` uses it as
 `base`, and `main.jsx` passes `import.meta.env.BASE_URL` to `BrowserRouter` as `basename`, so router
-links stay inside `/<repo>/`. Both default to the site root, which is what local development and the
-tests use.
+links stay inside `/<repo>/`. The local default is `/Farming-Nyumbani/`; set `VITE_BASE_PATH` when
+deploying under a different repository name or preview subpath.
 
 GitHub Pages has no server-side rewrites, so a shared link like `/repo/farms/<id>` would otherwise
 hit a Pages 404. `scripts/spa-fallback.mjs` runs after the build and writes a `dist/404.html` that
@@ -142,8 +142,8 @@ refresh, on a shared link, and in a new tab.
 To check the published build locally:
 
 ```bash
-VITE_BASE_PATH=/farming-nyumbani/ npm run build:pages
-npx vite preview --base /farming-nyumbani/   # open the printed /farming-nyumbani/ URL
+VITE_BASE_PATH=/Farming-Nyumbani/ npm run build:pages
+npx vite preview --base /Farming-Nyumbani/   # open the printed /Farming-Nyumbani/ URL
 ```
 
 ### Firebase on the deployed site
