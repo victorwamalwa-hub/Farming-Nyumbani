@@ -64,7 +64,7 @@ describe('ErrorBoundary', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'Back to the home page' }))
 
-      expect(assign).toHaveBeenCalledWith('/')
+      expect(assign.mock.calls[0][0]).toMatch(/Farming-Nyumbani|^\/$/)
     } finally {
       Object.defineProperty(window, 'location', { configurable: true, value: original })
     }

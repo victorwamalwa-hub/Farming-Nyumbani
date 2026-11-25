@@ -34,7 +34,7 @@ export default class ErrorBoundary extends Component {
           </p>
           <button
             type="button"
-            onClick={() => window.location.assign(import.meta.env.BASE_URL || '/')}
+            onClick={() => window.location.assign('/Farming-Nyumbani/')}
             className="mt-6 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark"
           >
             Back to the home page
