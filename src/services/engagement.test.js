@@ -1,4 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('../lib/firebase', () => ({
+  auth: null,
+  db: null,
+  isFirebaseConfigured: false,
+}))
+
 import {
   addComment,
   addReview,
